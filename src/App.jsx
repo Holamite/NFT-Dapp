@@ -1,5 +1,5 @@
 import { Box, Button, Container, Flex, Text } from "@radix-ui/themes";
-import { configureWeb3Modal } from "./connection";
+import { configureWeb3Modal } from "../connection";
 import "@radix-ui/themes/styles.css";
 import Header from "./component/Header";
 import AppTabs from "./component/AppTabs";
