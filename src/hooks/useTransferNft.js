@@ -1,6 +1,5 @@
 import { useCallback } from "react";
-import { getProvider } from "../Constant/provider";
-import { getProposalsContract } from "../Constant/contracts";
+import { getProvider } from "../constants/providers";
 import {
   useWeb3ModalAccount,
   useWeb3ModalProvider,
@@ -15,10 +14,8 @@ const useTransferNft = (address, edition) => {
     const readWriteProvider = getProvider(walletProvider);
     const signer = await readWriteProvider.getSigner();
 
-    const contract = getProposalsContract(signer);
-
     try {
-      const transaction = await contract.giveRightToVote(
+      const transaction = await contract.transferForm(
         signer.address,
         address,
         edition
@@ -29,14 +26,14 @@ const useTransferNft = (address, edition) => {
       console.log("receipt: ", receipt);
 
       if (receipt.status) {
-        return toast.success("giveRightToVote successful!");
+        return toast.success("Transfer Successful!");
       }
 
-      console.log("giveRightToVote failed!");
+      console.log("Transfer failed!");
     } catch (error) {
       toast.error(error);
     }
-  }, [address, chainId, walletProvider]);
+  }, [address, chainId, walletProvider, edition]);
 };
 
 export default useTransferNft;
