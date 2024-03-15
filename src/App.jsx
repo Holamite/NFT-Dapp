@@ -1,35 +1,104 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Box, Button, Container, Flex, Text } from "@radix-ui/themes";
+import { configureWeb3Modal } from "./connection/index";
+import "@radix-ui/themes/styles.css";
+import Header from "./component/Header";
+import AppTabs from "./component/AppTabs";
+import useCollections from "./hooks/useCollections";
+import useMyNfts from "./hooks/useMyNfts";
+import "./output.css";
+import { useState } from "react";
+import useMintNft from "./hooks/useMintNft";
+
+configureWeb3Modal();
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [edition, setEdition] = useState("");
+
+  const mint = useMintNft(edition);
+
+  const tokensData = useCollections();
+  const myTokenIds = useMyNfts();
+
+  const myTokensData = tokensData.filter((x, index) =>
+    myTokenIds.includes(index)
+  );
+
+  function viewNFT(id) {
+    window.open(
+      `https://testnets.opensea.io/assets/mumbai/${
+        import.meta.env.VITE_contract_address
+      }/${id}`
+    );
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Container>
+      <Header />
+      <main className="mt-6">
+        <AppTabs
+          MyNfts={
+            <Flex align="center" gap="8" wrap={"wrap"}>
+              {myTokensData.length === 0 ? (
+                <Text>No NFT owned yet</Text>
+              ) : (
+                myTokensData.map((x) => (
+                  <Box key={x.dna} className="w-[20rem]">
+                    <img
+                      src={x.image}
+                      className="w-full object-contain"
+                      alt={x.name}
+                    />
+                    <Text className="block text-2xl">Name: {x.name}</Text>
+                    <Text className="block">Description: {x.description}</Text>
+                    <Button
+                      onClick={() => viewNFT(x.edition)}
+                      className="px-8 py-2 text-xl mt-2"
+                    >
+                      View NFT
+                    </Button>
+                  </Box>
+                ))
+              )}
+            </Flex>
+          }
+          AllCollections={
+            <Flex align="center" gap="8" wrap={"wrap"}>
+              {tokensData.length === 0 ? (
+                <Text>Loading...</Text>
+              ) : (
+                tokensData.map((x) => (
+                  <Box key={x.dna} className="w-[20rem]">
+                    <img
+                      src={x.image}
+                      className="w-full object-contain"
+                      alt={x.name}
+                    />
+                    <Text className="block text-2xl">Name: {x.name}</Text>
+                    <Text className="block">Description: {x.description}</Text>
+                    {myTokensData.includes(x) ? (
+                      <Button
+                        onClick={() => viewNFT(x.edition)}
+                        className="px-8 py-2 text-xl mt-2"
+                      >
+                        View NFT
+                      </Button>
+                    ) : (
+                      <Button
+                        className="px-8 py-2 text-xl mt-2"
+                        onClick={() => mint(setEdition(x.edition))}
+                      >
+                        Mint
+                      </Button>
+                    )}
+                  </Box>
+                ))
+              )}
+            </Flex>
+          }
+        />
+      </main>
+    </Container>
+  );
 }
 
-export default App
+export default App;
